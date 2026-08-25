@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>描述與比較說明互動遊戲</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+            --primary-color: #FF758F;
+            --secondary-color: #FFF0F3;
+            --accent-color: #3A86FF;
+            --success-color: #38B000;
+            --danger-color: #FF0054;
+            --text-color: #4A4E69;
+            --card-bg: rgba(255, 255, 255, 0.92);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'PingFang HK', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(255, 117, 143, 0.15);
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #FF5C8A;
+            margin-top: 0;
+            font-size: 32px;
+            text-shadow: 2px 2px 0px #FFF;
+            letter-spacing: 2px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #FFF;
+            padding: 15px 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            border: 2px solid #FFC2D1;
+        }
+
+        .score-board {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FF5C8A;
+        }
+
+        .instructions {
+            font-size: 16px;
+            color: #6C757D;
+            font-weight: bold;
+        }
+
+        /* 情景說明區塊 */
+        .scenario-box {
+            background: #FFF9E6;
+            border: 2px dashed #FFD6A5;
+            padding: 20px 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            font-size: 18px;
+            line-height: 1.6;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+        }
+        .scenario-box strong {
+            color: #FF9F43;
+            font-size: 19px;
+        }
+        .highlight-text {
+            color: #FF0054; 
+            font-weight: bold; 
+            text-shadow: 1px 1px 0px #FFF;
+            background: #FFE3E3;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        /* 資料表格樣式 - 加入 Sticky 固定效果 */
+        .table-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 3px solid #FFE5EC;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 15px;
+            z-index: 50;
+        }
+        .table-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #FF758F;
+            font-size: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 2px solid #FFE5EC;
+            padding: 8px 10px;
+            font-size: 15px;
+        }
+        th {
+            background-color: #FF8FAB;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #FFF0F3;
+        }
+        td strong {
+            color: #FF5C8A;
+        }
+
+        /* 關卡卡片 */
+        .level-card {
+            background: #fff;
+            border: 2px solid #E8E8E8;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.02);
+            z-index: 1;
+        }
+
+        .level-card.locked {
+            opacity: 0.4;
+            pointer-events: none;
+            background: #F8F9FA;
+        }
+
+        .level-badge {
+            position: absolute;
+            top: -14px;
+            left: 25px;
+            background: linear-gradient(45deg, #FF758F, #FF8FAB);
+            color: white;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.3);
+        }
+
+        .level-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #495057;
+            margin-top: 10px;
+            border-bottom: 2px dashed #FFE5EC;
+            padding-bottom: 10px;
+        }
+
+        .content-paragraph {
+            font-size: 19px;
+            line-height: 2.2;
+            text-align: justify;
+            color: #4A4E69;
+        }
+
+        /* 互動下拉選單按鈕 */
+        .blank-container {
+            position: relative;
+            display: inline-block;
+            margin: 0 6px;
+            vertical-align: middle;
+        }
+
+        .blank-btn {
+            background: #FFF;
+            border: 2px dashed #FF8FAB;
+            color: #FF5C8A;
+            padding: 3px 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .blank-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .blank-container.correct .blank-btn {
+            background: #E8F5E9;
+            border: 2px solid var(--success-color);
+            color: var(--success-color);
+            cursor: default;
+            box-shadow: none;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 2px solid #FFE5EC;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(255, 117, 143, 0.15);
+            z-index: 100;
+            min-width: 180px;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .dropdown-option {
+            padding: 12px 18px;
+            font-size: 17px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s, color 0.2s;
+            color: #4A4E69;
+            font-weight: 500;
+        }
+
+        .dropdown-option:hover {
+            background: #FFF0F3;
+            color: #FF5C8A;
+        }
+
+        .dropdown-option.wrong {
+            background: #FFE3E3;
+            color: var(--danger-color);
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
+
+        /* 下一關按鈕 */
+        .next-btn {
+            display: block;
+            margin: 25px auto 0 auto;
+            background: linear-gradient(45deg, #3A86FF, #00B4D8);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 19px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(58, 134, 255, 0.3);
+            transition: all 0.2s;
+        }
+        .next-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 鎖定遮罩 */
+        .lock-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #9A8C98;
+            border-radius: 24px;
+            z-index: 10;
+            backdrop-filter: blur(2px);
+        }
+
+        /* 成功通關對話框 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(74, 78, 105, 0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-box {
+            background: white;
+            padding: 45px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            max-width: 550px;
+            width: 90%;
+            border: 4px solid #FFB5A7;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-box h2 {
+            color: #FF5C8A;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 0px #FFF;
+        }
+        .modal-box p {
+            font-size: 22px;
+            line-height: 1.6;
+            color: #4A4E69;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .restart-btn {
+            background: linear-gradient(45deg, #FF758F, #FF8FAB);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 117, 143, 0.3);
+            transition: all 0.2s;
+        }
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 動畫特效 */
+        @keyframes popIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* 彩色氣球飄浮動畫 */
+        #balloon-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 998;
+            overflow: hidden;
+            display: none;
+        }
+        .balloon {
+            position: absolute;
+            bottom: -120px;
+            width: 65px;
+            height: 80px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            animation: flyUp 5s linear forwards;
+            box-shadow: inset -6px -6px rgba(0,0,0,0.08);
+        }
+        .balloon::before {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 28px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 6px solid inherit;
+        }
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -26px;
+            left: 32px;
+            width: 2px;
+            height: 20px;
+            background: rgba(0,0,0,0.15);
+        }
+        @keyframes flyUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+            90% { opacity: 0.9; }
+            100% { transform: translateY(-130vh) rotate(20deg); opacity: 0; }
+        }
+
+        /* 答錯晃動 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+<div id="balloon-container"></div>
+
+<div class="container">
+    <h1>🥤 描述與比較說明</h1>
+    
+    <div class="game-info">
+        <div class="score-board">目前得分：<span id="score-text">0</span> 分</div>
+        <div class="instructions">🍭 規則：答對 +2 分，答錯扣 1 分</div>
+    </div>
+
+    <!-- 醒目情景說明區塊 -->
+    <div class="scenario-box">
+        <strong>情景：</strong>你和朋友在進行問卷調查後，決定開一家<span class="highlight-text">外賣台式飲品店</span>。你找了三個適合開店地點，請嘗試向朋友描述不同地點的資料並進行比較。
+    </div>
+
+    <!-- 參考資料卡片 (現在會固定在頂部) -->
+    <div class="table-card">
+        <h3>📊 開店地點資料參考表</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>地點 / 特點</th>
+                    <th>一：旺角 (九龍區)</th>
+                    <th>二：沙田市中心 (新界)</th>
+                    <th>三：荃灣市中心 (新界)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>位置</strong></td>
+                    <td>旺角商場三樓</td>
+                    <td>沙田商場地下</td>
+                    <td>新會商場一樓</td>
+                </tr>
+                <tr>
+                    <td><strong>面積</strong></td>
+                    <td>100平方呎</td>
+                    <td>200平方呎</td>
+                    <td>150平方呎</td>
+                </tr>
+                <tr>
+                    <td><strong>租金</strong></td>
+                    <td>$30000/月</td>
+                    <td>$35000/月</td>
+                    <td>$28000/月</td>
+                </tr>
+                <tr>
+                    <td><strong>主要人流</strong></td>
+                    <td>年輕人</td>
+                    <td>居民, 上班族</td>
+                    <td>年輕人, 居民</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第一關 -->
+    <div class="level-card" id="level1-card">
+        <span class="level-badge">第 1 關</span>
+        <div class="level-title">1. 概括說明</div>
+        <div class="content-paragraph">
+            店舖的選擇有三個,地點分別是
+            <div class="blank-container" id="q1">
+                <button class="blank-btn" onclick="toggleDropdown('q1')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>、
+            <div class="blank-container" id="q2">
+                <button class="blank-btn" onclick="toggleDropdown('q2')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>和
+            <div class="blank-container" id="q3">
+                <button class="blank-btn" onclick="toggleDropdown('q3')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>;面積由
+            <div class="blank-container" id="q4">
+                <button class="blank-btn" onclick="toggleDropdown('q4')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>平方呎,租金、人流都有差異。
+        </div>
+        <button class="next-btn" id="l1-next-btn" style="display:none;" onclick="unlockLevel2()">進入第二關 🍧</button>
+    </div>
+
+    <!-- 第二關 -->
+    <div class="level-card locked" id="level2-card">
+        <div class="lock-overlay" id="l2-lock-mask">🔒 請先完成第一關的所有填空喔！</div>
+        <span class="level-badge">第 2 關</span>
+        <div class="level-title">2. 分類及比較說明</div>
+        <div class="content-paragraph">
+            位置方面,三間店舖都位於商場,旺角舖在
+            <div class="blank-container" id="q5">
+                <button class="blank-btn" onclick="toggleDropdown('q5')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,沙田的舖在
+            <div class="blank-container" id="q6">
+                <button class="blank-btn" onclick="toggleDropdown('q6')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,荃灣的在
+            <div class="blank-container" id="q7">
+                <button class="blank-btn" onclick="toggleDropdown('q7')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>。三個舖當中,以
+            <div class="blank-container" id="q8">
+                <button class="blank-btn" onclick="toggleDropdown('q8')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>店舖的人流最多。<br><br>
+            
+            店舖面積方面,沙田舖大概有
+            <div class="blank-container" id="q9">
+                <button class="blank-btn" onclick="toggleDropdown('q9')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>平方呎,是
+            <div class="blank-container" id="q10">
+                <button class="blank-btn" onclick="toggleDropdown('q10')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>的一個。其次是荃灣舖,有
+            <div class="blank-container" id="q11">
+                <button class="blank-btn" onclick="toggleDropdown('q11')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>平方呎。旺角舖
+            <div class="blank-container" id="q12">
+                <button class="blank-btn" onclick="toggleDropdown('q12')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,只有
+            <div class="blank-container" id="q13">
+                <button class="blank-btn" onclick="toggleDropdown('q13')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>平方呎,比較狹窄,空間未必足夠。<br><br>
+            
+            租金方面,以金額來看,沙田舖租金
+            <div class="blank-container" id="q14">
+                <button class="blank-btn" onclick="toggleDropdown('q14')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,每月要
+            <div class="blank-container" id="q15">
+                <button class="blank-btn" onclick="toggleDropdown('q15')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>元;其次是旺角舖,每月
+            <div class="blank-container" id="q16">
+                <button class="blank-btn" onclick="toggleDropdown('q16')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>元;最低的是荃灣舖,每月租金只要
+            <div class="blank-container" id="q17">
+                <button class="blank-btn" onclick="toggleDropdown('q17')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>。但是以呎租來算,旺角舖
+            <div class="blank-container" id="q18">
+                <button class="blank-btn" onclick="toggleDropdown('q18')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,呎租要
+            <div class="blank-container" id="q19">
+                <button class="blank-btn" onclick="toggleDropdown('q19')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>元,沙田舖就
+            <div class="blank-container" id="q20">
+                <button class="blank-btn" onclick="toggleDropdown('q20')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,每呎
+            <div class="blank-container" id="q21">
+                <button class="blank-btn" onclick="toggleDropdown('q21')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>元,荃灣舖呎租
+            <div class="blank-container" id="q22">
+                <button class="blank-btn" onclick="toggleDropdown('q22')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>元,比沙田
+            <div class="blank-container" id="q23">
+                <button class="blank-btn" onclick="toggleDropdown('q23')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>。<br><br>
+            
+            人流方面,旺角的人流主要是
+            <div class="blank-container" id="q24">
+                <button class="blank-btn" onclick="toggleDropdown('q24')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,是我們的目標客群。荃灣市中心的人流主要是
+            <div class="blank-container" id="q25">
+                <button class="blank-btn" onclick="toggleDropdown('q25')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>,沙田市中心就以
+            <div class="blank-container" id="q26">
+                <button class="blank-btn" onclick="toggleDropdown('q26')">【請選擇】</button>
+                <div class="dropdown-menu"></div>
+            </div>為主。
+        </div>
+    </div>
+</div>
+
+<!-- 成功通關對話框 -->
+<div class="modal-overlay" id="success-modal">
+    <div class="modal-box">
+        <h2>🎈 挑戰成功 🎈</h2>
+        <p>恭喜你學會描述和比較說明的技巧</p>
+        <p style="font-size:16px; color:#6C757D; font-weight:normal;">你的最終得分：<span id="final-score" style="color:#FF5C8A; font-weight:bold;">0</span> 分</p>
+        <button class="restart-btn" onclick="restartGame()">再玩一次 🔄</button>
+    </div>
+</div>
+
+<script>
+    // 題目與答案設定
+    const questionsConfig = {
+        q1: { answer: "旺角市中心", options: ["旺角市中心", "銅鑼灣市中心", "尖沙咀市中心"] },
+        q2: { answer: "沙田市中心", options: ["沙田市中心", "元朗市中心", "大埔市中心"] },
+        q3: { answer: "荃灣市中心", options: ["荃灣市中心", "觀塘市中心", "將軍澳市中心"] },
+        q4: { answer: "100至200", options: ["100至200", "50至150", "200至300"] },
+        
+        q5: { answer: "三樓", options: ["三樓", "地面", "一樓"] },
+        // 這裡將原本的「地面」修改為「地下」
+        q6: { answer: "地下", options: ["地下", "三樓", "一樓"] },
+        q7: { answer: "一樓", options: ["一樓", "地面", "三樓"] },
+        q8: { answer: "沙田", options: ["沙田", "旺角", "荃灣"] },
+        
+        q9: { answer: "200", options: ["200", "150", "100"] },
+        q10: { answer: "最大", options: ["最大", "最小", "第二大"] },
+        q11: { answer: "150", options: ["150", "200", "100"] },
+        q12: { answer: "最小", options: ["最小", "最大", "適中"] },
+        q13: { answer: "100", options: ["100", "150", "200"] },
+        
+        q14: { answer: "最高", options: ["最高", "最低", "居中"] },
+        q15: { answer: "三萬五千", options: ["三萬五千", "三萬", "兩萬八千"] },
+        q16: { answer: "三萬", options: ["三萬", "三萬五千", "兩萬八千"] },
+        q17: { answer: "兩萬八千元", options: ["兩萬八千元", "三萬五千元", "三萬元"] },
+        q18: { answer: "最貴", options: ["最貴", "最便宜", "略高"] },
+        q19: { answer: "300", options: ["300", "175", "187"] },
+        q20: { answer: "最便宜", options: ["最便宜", "最貴", "略高"] },
+        q21: { answer: "175", options: ["175", "300", "187"] },
+        q22: { answer: "187", options: ["187", "300", "175"] },
+        q23: { answer: "略高", options: ["略高", "略低", "一樣"] },
+        
+        q24: { answer: "年輕人", options: ["年輕人", "居民", "上班族"] },
+        q25: { answer: "年輕人及附近的居民", options: ["年輕人及附近的居民", "居民及上班族", "純上班族"] },
+        q26: { answer: "居民及上班族", options: ["居民及上班族", "年輕人及附近的居民", "純遊客群"] }
+    };
+
+    let score = 0;
+    let answeredCorrectly = {};
+
+    function initGame() {
+        score = 0;
+        answeredCorrectly = {};
+        document.getElementById('score-text').innerText = score;
+        document.getElementById('level2-card').classList.add('locked');
+        document.getElementById('l2-lock-mask').style.display = 'flex';
+        document.getElementById('l1-next-btn').style.display = 'none';
+        document.getElementById('success-modal').style.display = 'none';
+        document.getElementById('balloon-container').style.display = 'none';
+        document.getElementById('balloon-container').innerHTML = '';
+
+        for (let qId in questionsConfig) {
+            const container = document.getElementById(qId);
+            container.classList.remove('correct');
+            const btn = container.querySelector('.blank-btn');
+            btn.innerText = "【請選擇】";
+            
+            const menu = container.querySelector('.dropdown-menu');
+            menu.innerHTML = '';
+            
+            const shuffledOptions = [...questionsConfig[qId].options].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-option';
+                div.innerText = opt;
+                div.onclick = (e) => {
+                    e.stopPropagation();
+                    handleSelection(qId, opt, div);
+                };
+                menu.appendChild(div);
+            });
+            answeredCorrectly[qId] = false;
+        }
+    }
+
+    function toggleDropdown(qId) {
+        if (answeredCorrectly[qId]) return;
+        
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu.parentNode.id !== qId) menu.classList.remove('show');
+        });
+
+        const currentMenu = document.getElementById(qId).querySelector('.dropdown-menu');
+        currentMenu.classList.toggle('show');
+    }
+
+    function handleSelection(qId, selectedOpt, optionElem) {
+        const container = document.getElementById(qId);
+        const btn = container.querySelector('.blank-btn');
+        const menu = container.querySelector('.dropdown-menu');
+        
+        if (selectedOpt === questionsConfig[qId].answer) {
+            score += 2;
+            answeredCorrectly[qId] = true;
+            container.classList.add('correct');
+            btn.innerText = selectedOpt;
+            menu.classList.remove('show');
+            
+            checkProgress();
+        } else {
+            if (!optionElem.classList.contains('wrong')) {
+                score -= 1;
+                optionElem.classList.add('wrong');
+                container.classList.add('shake');
+                setTimeout(() => container.classList.remove('shake'), 400);
+            }
+        }
+        document.getElementById('score-text').innerText = score;
+    }
+
+    function checkProgress() {
+        const l1Finished = ['q1', 'q2', 'q3', 'q4'].every(id => answeredCorrectly[id]);
+        if (l1Finished && document.getElementById('level2-card').classList.contains('locked')) {
+            document.getElementById('l1-next-btn').style.display = 'block';
+        }
+
+        const allFinished = Object.keys(questionsConfig).every(id => answeredCorrectly[id]);
+        if (allFinished) {
+            triggerWinCelebration();
+        }
+    }
+
+    function unlockLevel2() {
+        document.getElementById('level2-card').classList.remove('locked');
+        document.getElementById('l2-lock-mask').style.display = 'none';
+        document.getElementById('l1-next-btn').style.display = 'none';
+        
+        // 修改捲動行為，預留給固定資料表的空間
+        const targetElement = document.getElementById('level2-card');
+        const offset = 250; // 資料表大約佔據的高度
+        const elementPosition = targetElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        
+        window.scrollTo({
+             top: offsetPosition,
+             behavior: "smooth"
+        });
+    }
+
+    function triggerWinCelebration() {
+        const balloonContainer = document.getElementById('balloon-container');
+        balloonContainer.style.display = 'block';
+        
+        const candyColors = ['#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A8DADC', '#FFC6FF'];
+        
+        for (let i = 0; i < 45; i++) {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            const randomColor = candyColors[Math.floor(Math.random() * candyColors.length)];
+            balloon.style.backgroundColor = randomColor;
+            balloon.style.setProperty('border-bottom-color', randomColor);
+            balloon.style.left = Math.random() * 95 + 'vw';
+            balloon.style.animationDelay = (Math.random() * 2.5) + 's';
+            balloon.style.animationDuration = (Math.random() * 2 + 4) + 's';
+            balloonContainer.appendChild(balloon);
+        }
+
+        setTimeout(() => {
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('success-modal').style.display = 'flex';
+        }, 1000);
+    }
+
+    function restartGame() {
+        initGame();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.blank-btn')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+    }
+
+    window.onload = initGame;
+</script>
+
+</body>
+</html>
